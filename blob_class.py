@@ -1,6 +1,6 @@
 import random
 
-class Blob:
+class Blob(object):
 
     def __init__(self, color, x_boundary, y_boundary, size_range=(4,8), movement_range= (-1,2)): #dunder init
         
@@ -18,7 +18,7 @@ class Blob:
         self.x += self.move_x
         self.y += self.move_y
 
-    def check_bounds(self):
+    def check_bounds(self): #optional to check boundaries
         if self.x < 0:
             self.x = 0
         elif self.x > self.x_boundary:
