@@ -4,7 +4,19 @@
 import random
 import pygame
 from blob_class import Blob
-import numpy as np
+import math
+import logging
+import datetime
+
+'''
+DEBUG - Detailed information, typically when diagnosing problems.
+INFO - Confirmation things are working as expected
+WARNING - Something unexpected happened
+ERROR - Due to a more serious problem
+CRITICAL - A serious error
+'''
+
+logging.basicConfig(filename='logfile.log {}'.format(datetime.datetime.now()), level=logging.INFO)
 
 # num blobs
 STARTING_BLUE_BLOBS = 20
@@ -34,6 +46,7 @@ class BlueBlob(Blob):
         Blob.__init__(self, (0 , 0, 255), x_boundary, y_boundary, movement_range=movement_range)
 
     def __add__(self, other_blob):
+        logging.info('Blob add op {} + {}'.format(str(self.color), str(other_blob.color)))
         if other_blob.color == (255, 0, 0):
             self.size -= other_blob.size
             other_blob.size -= self.size
@@ -57,13 +70,14 @@ class GreenBlob(Blob):
 
 
 def is_touching(b1,b2):
-    return np.linalg.norm(np.array([b1.x,b1.y]) - np.array([b2.x,b2.y])) < (b1.size + b2.size)
-        
+    return math.sqrt((b2.x - b1.x)**2 + (b2.y - b1.y)**2) < (b1.size + b2.size)
 def handle_collisions(blob_list):
     blues, reds, greens = blob_list #list of 3 dicts
     for blue_id, blue_blob in blues.copy().items(): #only copy if u want to modify
         for other_blobs in blues, reds, greens:
             for other_blob_id, other_blob in other_blobs.copy().items():
+                logging.debug('Checking if blobs are touching {} + {}'.format(
+                    str(blue_blob.color), str(other_blob.color)))
                 if blue_blob == other_blob:
                     pass
                 else:
@@ -102,13 +116,19 @@ def main():
 ## 
 
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-                
-        blue_blobs, red_blobs, green_blobs = draw_environment([blue_blobs, red_blobs, green_blobs])
-        clock.tick(60)
+        try:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                    
+            blue_blobs, red_blobs, green_blobs = draw_environment([blue_blobs, red_blobs, green_blobs])
+            clock.tick(60)
+        except Exception as e:
+            logging.critical(str(e))
+            pygame.quit()
+            quit()
+            break
 
 if __name__ == "__main__":
     main()
